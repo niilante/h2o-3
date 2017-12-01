@@ -113,6 +113,10 @@ public class GLMModel extends Model<GLMModel,GLMModel.GLMParameters,GLMModel.GLM
     return new GLMMetricBuilder(domain, _ymu, new GLMWeightsFun(_parms), _output.bestSubmodel().rank(), true, _parms._intercept);
   }
 
+  @Override public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return makeMetricBuilder(domain);
+  }
+
   protected double [] beta_internal(){
     if(_parms._family == Family.multinomial)
       return ArrayUtils.flat(_output._global_beta_multinomial);

@@ -23,7 +23,7 @@ public class Score extends CMetricScoringTask<Score> {
   final boolean _computeGainsLift;
   final ScoreIncInfo _sii;      // Incremental scoring (on a validation dataset), null indicates full scoring
   final Frame _preds;           // Prediction cache (typically not too many Vecs => it is not too costly embed the object in MRTask)
-  
+  final boolean _finalScore;    // denote if this is the last scoring
   /** Output parameter: Metric builder */
   ModelMetricsSupervised.MetricBuilderSupervised _mb;
 
@@ -32,17 +32,26 @@ public class Score extends CMetricScoringTask<Score> {
    *  and contains a response which is adapted to confusion matrix domain.
    */
   public Score(SharedTree bldr, boolean is_train, boolean oob, Vec kresp, ModelCategory mcat, boolean computeGainsLift, Frame preds, CFuncRef customMetricFunc) {
-    this(bldr, is_train, null, oob, kresp, mcat, computeGainsLift, preds, customMetricFunc);
+    this(bldr, is_train, null, oob, kresp, mcat, computeGainsLift, preds, customMetricFunc, false);
+  }
+
+  public Score(SharedTree bldr, boolean is_train, boolean oob, Vec kresp, ModelCategory mcat, boolean computeGainsLift, Frame preds, CFuncRef customMetricFunc, boolean finalScore) {
+    this(bldr, is_train, null, oob, kresp, mcat, computeGainsLift, preds, customMetricFunc, finalScore);
   }
 
   public Score(SharedTree bldr, ScoreIncInfo sii, boolean oob, Vec kresp, ModelCategory mcat, boolean computeGainsLift, Frame preds, CFuncRef customMetricFunc) {
-    this(bldr, false, sii, oob, kresp, mcat, computeGainsLift, preds, customMetricFunc);
+    this(bldr, false, sii, oob, kresp, mcat, computeGainsLift, preds, customMetricFunc, false);
   }
 
-  private Score(SharedTree bldr, boolean is_train, ScoreIncInfo sii, boolean oob, Vec kresp, ModelCategory mcat, boolean computeGainsLift, Frame preds, CFuncRef customMetricFunc) {
+  public Score(SharedTree bldr, ScoreIncInfo sii, boolean oob, Vec kresp, ModelCategory mcat, boolean computeGainsLift, Frame preds, CFuncRef customMetricFunc, boolean finalScore) {
+    this(bldr, false, sii, oob, kresp, mcat, computeGainsLift, preds, customMetricFunc, finalScore);
+  }
+
+  private Score(SharedTree bldr, boolean is_train, ScoreIncInfo sii, boolean oob, Vec kresp, ModelCategory mcat, boolean computeGainsLift, Frame preds, CFuncRef customMetricFunc, boolean finalScore) {
   super(customMetricFunc);
     _bldr = bldr; _is_train = is_train; _sii = sii; _oob = oob; _kresp = kresp._key; _mcat = mcat; _computeGainsLift = computeGainsLift;
     _preds = computeGainsLift ? preds : null; // don't keep the prediction cache if we don't need to compute gainslift
+    _finalScore = finalScore;
     assert (! _is_train) || (_sii == null);
   }
 
@@ -60,7 +69,7 @@ public class Score extends CMetricScoringTask<Score> {
     // If this is a score-on-train AND DRF, then oobColIdx makes sense,
     // otherwise this field is unused.
     final int oobColIdx = _bldr.idx_oobt();
-    _mb = m.makeMetricBuilder(domain);
+    _mb = m.makeMetricBuilder(domain, _finalScore);
 //    _gainsLiftBuilder = _bldr._model._output.nclasses()==2 ? new GainsLift.GainsLiftBuilder(_fr.vec(_bldr.idx_tree(0)).pctiles()) : null;
     final double[] cdists = _mb._work; // Temp working array for class distributions
     // If working a validation set, need to push thru official model scoring
@@ -155,7 +164,7 @@ public class Score extends CMetricScoringTask<Score> {
   }
 
   static Frame makePredictionCache(SharedTreeModel model, Vec resp) {
-    ModelMetricsSupervised.MetricBuilderSupervised mb = model.makeMetricBuilder(resp.domain());
+    ModelMetricsSupervised.MetricBuilderSupervised mb = model.makeMetricBuilder(resp.domain(), false);
     return mb.makePredictionCache(model, resp);
   }
 

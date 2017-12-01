@@ -126,6 +126,10 @@ public class DeepLearningModel extends Model<DeepLearningModel,DeepLearningModel
     }
   }
 
+  @Override public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return makeMetricBuilder(domain);
+  }
+
   /**
    * Helper to allocate keys for output frames for weights and biases
    * @param destKey Base destination key for output frames

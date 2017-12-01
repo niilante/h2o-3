@@ -190,6 +190,10 @@ public class StackedEnsembleModel extends Model<StackedEnsembleModel,StackedEnse
     throw new UnsupportedOperationException("StackedEnsembleModel.makeMetricBuilder should never be called!");
   }
 
+  @Override public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    throw new UnsupportedOperationException("StackedEnsembleModel.makeMetricBuilder should never be called!");
+  }
+
   public ModelMetrics doScoreMetricsOneFrame(Frame frame, Job job) {
       Frame pred = this.predictScoreImpl(frame, new Frame(frame), null, job, true, CFuncRef.from(_parms._custom_metric_func));
       pred.remove();

@@ -1,6 +1,5 @@
 package hex.schemas;
 
-import hex.Distribution;
 import hex.tree.gbm.GBM;
 import hex.tree.gbm.GBMModel.GBMParameters;
 import water.api.API;
@@ -62,7 +61,8 @@ public class GBMV3 extends SharedTreeV3<GBM,GBMV3,GBMV3.GBMParametersV3> {
       "categorical_encoding",
       "calibrate_model",
       "calibration_frame",
-      "custom_metric_func"
+      "custom_metric_func",
+      "true_reproducibility"
 //      "use_new_histo_tsk",
 //      "col_block_sz",
 //      "min_threads",
@@ -85,6 +85,9 @@ public class GBMV3 extends SharedTreeV3<GBM,GBMV3,GBMV3.GBMParametersV3> {
 
     @API(help="Bandwidth (sigma) of Gaussian multiplicative noise ~N(1,sigma) for tree node predictions", level = API.Level.expert, gridable = true)
     public double pred_noise_bandwidth;
+
+    @API(help="Determines if users want to have true reproducibility of GBM binomials on different runs as long as the seed is fixed and the cluster setup is the same.", level = API.Level.expert, gridable = false)
+    public boolean true_reproducibility;
 
 //    // TODO debug only, remove!
 //    @API(help="Internal flag, use new version of histo tsk if set", level = API.Level.expert, gridable = false)

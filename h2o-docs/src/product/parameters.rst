@@ -94,6 +94,7 @@ This Appendix provides detailed descriptions of parameters that can be specified
    data-science/algo-params/stopping_tolerance
    data-science/algo-params/training_frame
    data-science/algo-params/transform
+   data-science/algo-params/true_reproducibility
    data-science/algo-params/tweedie_link_power
    data-science/algo-params/tweedie_power
    data-science/algo-params/tweedie_variance_power

@@ -103,6 +103,11 @@ public class PCAModel extends Model<PCAModel,PCAModel.PCAParameters,PCAModel.PCA
   }
 
   @Override
+  public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return new ModelMetricsPCA.PCAModelMetrics(_parms._k);
+  }
+
+  @Override
   protected Frame predictScoreImpl(Frame origFr, Frame adaptedFr, String destination_key, final Job j, boolean computeMetrics, CFuncRef customMetricFunc) {
     Frame adaptFrm = new Frame(adaptedFr);
     for(int i = 0; i < _parms._k; i++)

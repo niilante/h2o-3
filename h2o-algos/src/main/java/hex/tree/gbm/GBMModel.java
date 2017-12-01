@@ -18,6 +18,7 @@ public class GBMModel extends SharedTreeModel<GBMModel, GBMModel.GBMParameters, 
     public double _col_sample_rate;
     public double _max_abs_leafnode_pred;
     public double _pred_noise_bandwidth;
+    public boolean _true_reproducibility;
 
     public GBMParameters() {
       super();
@@ -29,6 +30,7 @@ public class GBMModel extends SharedTreeModel<GBMModel, GBMModel.GBMParameters, 
       _max_depth = 5;
       _max_abs_leafnode_pred = Double.MAX_VALUE;
       _pred_noise_bandwidth =0;
+      _true_reproducibility = false;
     }
 
     public String algoName() { return "GBM"; }

@@ -67,6 +67,10 @@ public class NaiveBayesModel extends Model<NaiveBayesModel,NaiveBayesModel.Naive
     }
   }
 
+  @Override public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return makeMetricBuilder(domain);
+  }
+
   // Note: For small probabilities, product may end up zero due to underflow error. Can circumvent by taking logs.
   @Override protected double[] score0(double[] data, double[] preds) {
     double[] nums = new double[_output._levels.length];    // log(p(x,y)) for all levels of y

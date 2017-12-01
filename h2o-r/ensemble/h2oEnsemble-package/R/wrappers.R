@@ -176,6 +176,7 @@ h2o.gbm.wrapper <- function(x, y, training_frame, model_id = NULL,
                             categorical_encoding = c("AUTO", "Enum", "OneHotInternal", "OneHotExplicit", "Binary", "Eigen", "LabelEncoder", "SortByResponse", "EnumLimited"),
                             calibrate_model = FALSE,
                             calibration_frame = NULL,
+                            true_reproducibility = FALSE,
                             #verbose = FALSE,  #remove so that this is compatible with earlier versions of H2O
                             ...) {
   
@@ -246,7 +247,8 @@ h2o.gbm.wrapper <- function(x, y, training_frame, model_id = NULL,
           pred_noise_bandwidth = pred_noise_bandwidth,
           categorical_encoding = match.arg(categorical_encoding),
           calibrate_model = calibrate_model,
-          calibration_frame = calibration_frame)
+          calibration_frame = calibration_frame,
+          true_reproducibility = true_reproducibility)
 }
 
 

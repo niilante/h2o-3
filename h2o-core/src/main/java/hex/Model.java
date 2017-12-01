@@ -647,6 +647,8 @@ public abstract class Model<M extends Model<M,P,O>, P extends Model.Parameters, 
 
   public abstract ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain);
 
+  public abstract ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore);
+
   /** Full constructor */
   public Model(Key<M> selfKey, P parms, O output) {
     super(selfKey);

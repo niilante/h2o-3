@@ -258,6 +258,8 @@ Defining a GBM Model
 
 -  `calibrate_frame <algo-params/calibrate_frame.html>`__: Specifies the frame to be used for Platt scaling.
 
+-  `true_reproducibility <algo-params/true_reproducibility.html>`__: Will strive to guarantee true reproducibility of models independent of cluster deployment.  If the guarantee fails, will generate a warning to alert the user.  However, this can slow down the model building process though.  Defaults to False.
+
 -  **verbose**: Print scoring history to the console. For GBM, metrics are per tree. This value defaults to FALSE.
 
 Interpreting a GBM Model

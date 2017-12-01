@@ -120,6 +120,10 @@ public class SVDModel extends Model<SVDModel, SVDModel.SVDParameters, SVDModel.S
     return new ModelMetricsSVD.SVDModelMetrics(_parms._nv);
   }
 
+  @Override public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return new ModelMetricsSVD.SVDModelMetrics(_parms._nv);
+  }
+
   public static class ModelMetricsSVD extends ModelMetricsUnsupervised {
     public ModelMetricsSVD(Model model, Frame frame, CustomMetric customMetric) {
       super(model, frame, 0, Double.NaN, customMetric);

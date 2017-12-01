@@ -31,6 +31,11 @@ public class GrepModel extends Model<GrepModel,GrepModel.GrepParameters,GrepMode
     throw H2O.unimpl("GrepModel does not have Model Metrics.");
   }
 
+  @Override
+  public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    throw H2O.unimpl("GrepModel does not have Model Metrics.");
+  }
+
   @Override protected double[] score0(double data[/*ncols*/], double preds[/*nclasses+1*/]) {
     throw H2O.unimpl();
   }

@@ -38,7 +38,7 @@ class H2OGradientBoostingEstimator(H2OEstimator):
                       "huber_alpha", "checkpoint", "sample_rate", "sample_rate_per_class", "col_sample_rate",
                       "col_sample_rate_change_per_level", "col_sample_rate_per_tree", "min_split_improvement",
                       "histogram_type", "max_abs_leafnode_pred", "pred_noise_bandwidth", "categorical_encoding",
-                      "calibrate_model", "calibration_frame", "custom_metric_func"}
+                      "calibrate_model", "calibration_frame", "custom_metric_func", "true_reproducibility"}
         if "Lambda" in kwargs: kwargs["lambda_"] = kwargs.pop("Lambda")
         for pname, pvalue in kwargs.items():
             if pname == 'model_id':
@@ -845,5 +845,21 @@ class H2OGradientBoostingEstimator(H2OEstimator):
     def custom_metric_func(self, custom_metric_func):
         assert_is_type(custom_metric_func, None, str)
         self._parms["custom_metric_func"] = custom_metric_func
+
+
+    @property
+    def true_reproducibility(self):
+        """
+        Determines if users want to have true reproducibility of GBM binomials on different runs as long as the seed is
+        fixed.
+
+        Type: ``bool``  (default: ``False``).
+        """
+        return self._parms.get("true_reproducibility")
+
+    @true_reproducibility.setter
+    def true_reproducibility(self, true_reproducibility):
+        assert_is_type(true_reproducibility, None, bool)
+        self._parms["true_reproducibility"] = true_reproducibility
 
 

@@ -69,6 +69,11 @@ public class AggregatorModel extends Model<AggregatorModel,AggregatorModel.Aggre
   }
 
   @Override
+  public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return null;
+  }
+  
+  @Override
   protected double[] score0(double[] data, double[] preds) {
     return preds;
   }

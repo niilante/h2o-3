@@ -1,8 +1,8 @@
 package hex.tree.gbm;
 
-import hex.genmodel.utils.DistributionFamily;
 import hex.Distribution;
 import hex.ModelCategory;
+import hex.genmodel.utils.DistributionFamily;
 import hex.quantile.Quantile;
 import hex.quantile.QuantileModel;
 import hex.tree.*;
@@ -12,7 +12,10 @@ import hex.tree.DTree.UndecidedNode;
 import water.*;
 import water.exceptions.H2OModelBuilderIllegalArgumentException;
 import water.fvec.*;
-import water.util.*;
+import water.util.ArrayUtils;
+import water.util.Log;
+import water.util.MathUtils;
+import water.util.RandomUtils;
 
 import java.util.Arrays;
 import java.util.Random;

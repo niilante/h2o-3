@@ -1145,6 +1145,8 @@ types.
 
 -  **calibration_frame**: (DRF, GBM) Specifies the frame to be used for Platt scaling.
 
+-  **true_reproducibility**: (GBM) Will strive to guarantee true reproducibility of models independent of cluster deployment.  If the guarantee fails, will generate a warning to alert the user.  However, this can slow down the model scoring process though. Defaults to False.
+
 -  **seed**: (K-Means, GBM, DL, DRF) Specify the random number generator (RNG) seed for algorithm components dependent on randomization. The seed is consistent for each H2O instance so that you can create models with the same starting conditions in alternative configurations.
 
 -  **intercept**: (GLM) To include a constant term in the model, check this checkbox. This option is selected by default.

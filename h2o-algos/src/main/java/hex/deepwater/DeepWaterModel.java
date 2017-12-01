@@ -103,6 +103,10 @@ public class DeepWaterModel extends Model<DeepWaterModel,DeepWaterParameters,Dee
     }
   }
 
+  @Override public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return makeMetricBuilder(domain);
+  }
+
   static DataInfo makeDataInfo(Frame train, Frame valid, DeepWaterParameters parms) {
     double x = 0.782347234;
     boolean identityLink = new Distribution(parms).link(x) == x;

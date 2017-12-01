@@ -31,6 +31,11 @@ public class ExampleModel extends Model<ExampleModel,ExampleModel.ExampleParamet
     throw H2O.unimpl("No Model Metrics for ExampleModel.");
   }
 
+  @Override
+  public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    throw H2O.unimpl("No Model Metrics for ExampleModel.");
+  }
+
   @Override protected double[] score0(double data[/*ncols*/], double preds[/*nclasses+1*/]) {
     throw H2O.unimpl();
   }

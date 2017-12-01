@@ -83,6 +83,11 @@ public class CoxPHModel extends Model<CoxPHModel,CoxPHParameters,CoxPHOutput> {
     return new ModelMetricsRegression.MetricBuilderRegression();
   }
 
+  @Override
+  public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return new ModelMetricsRegression.MetricBuilderRegression();
+  }
+
   // Default publically visible Schema is V2
   public ModelSchemaV3 schema() { return new CoxPHModelV3(); }
 

@@ -89,6 +89,8 @@
 #'        accurate estimates of class probabilities. Defaults to FALSE.
 #' @param calibration_frame Calibration frame for Platt Scaling
 #' @param custom_metric_func Reference to custom evaluation function, format: `language:keyName=funcName`
+#' @param true_reproducibility \code{Logical}. Determines if users want to have true reproducibility of GBM binomials on different runs as
+#'        long as the seed is fixed. Defaults to FALSE.
 #' @param verbose \code{Logical}. Print scoring history to the console (Metrics per tree for GBM, DRF, & XGBoost. Metrics per epoch for Deep Learning). Defaults to FALSE.
 #' @seealso \code{\link{predict.H2OModel}} for prediction
 #' @examples
@@ -156,6 +158,7 @@ h2o.gbm <- function(x, y, training_frame,
                     calibrate_model = FALSE,
                     calibration_frame = NULL,
                     custom_metric_func = NULL,
+                    true_reproducibility = FALSE,
                     verbose = FALSE 
                     ) 
 {
@@ -295,6 +298,8 @@ h2o.gbm <- function(x, y, training_frame,
     parms$calibration_frame <- calibration_frame
   if (!missing(custom_metric_func))
     parms$custom_metric_func <- custom_metric_func
+  if (!missing(true_reproducibility))
+    parms$true_reproducibility <- true_reproducibility
   # Error check and build model
   .h2o.modelJob('gbm', parms, h2oRestApiVersion = 3, verbose=verbose) 
 }

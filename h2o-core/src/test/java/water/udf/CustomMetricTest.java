@@ -1,24 +1,18 @@
 package water.udf;
 
+import hex.*;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.util.Arrays;
-
-import hex.Model;
-import hex.ModelBuilder;
-import hex.ModelCategory;
-import hex.ModelMetrics;
-import hex.ModelMetricsBinomial;
-import hex.ModelMetricsMultinomial;
-import hex.ModelMetricsRegression;
 import water.DKV;
+import water.H2O;
 import water.Key;
 import water.TestUtil;
 import water.fvec.Frame;
 import water.util.FrameUtils;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 import static water.udf.JFuncUtils.loadTestFunc;
 
@@ -83,6 +77,11 @@ class NullModel extends Model<NullModel, NullModelParameters, NullModelOutput> {
       case Regression:  return new ModelMetricsRegression.MetricBuilderRegression();
       default: return null;
     }
+  }
+
+  @Override
+  public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    throw H2O.unimpl("No model metrics for Quantile.");
   }
   @Override
   protected double[] score0(double[] data, double[] preds) {

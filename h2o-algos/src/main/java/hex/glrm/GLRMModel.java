@@ -400,4 +400,8 @@ public class GLRMModel extends Model<GLRMModel, GLRMModel.GLRMParameters, GLRMMo
   @Override public ModelMetricsGLRM.GlrmModelMetricsBuilder makeMetricBuilder(String[] domain) {
     return new ModelMetricsGLRM.GlrmModelMetricsBuilder(_parms._k, _output._permutation, _parms._impute_original);
   }
+
+  @Override public ModelMetricsGLRM.GlrmModelMetricsBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    return makeMetricBuilder(domain);
+  }
 }

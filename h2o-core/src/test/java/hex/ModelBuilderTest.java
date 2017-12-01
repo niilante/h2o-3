@@ -63,6 +63,10 @@ public class ModelBuilderTest extends TestUtil {
       return null;
     }
     @Override
+    public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+      return null;
+    }
+    @Override
     protected double[] score0(double[] data, double[] preds) { return preds; }
   }
   public static class DummyModelBuilder extends ModelBuilder<DummyModel, DummyModelParameters, DummyModelOutput> {

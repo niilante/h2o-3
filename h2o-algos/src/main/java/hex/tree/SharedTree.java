@@ -7,6 +7,7 @@ import hex.glm.GLM;
 import hex.glm.GLMModel;
 import hex.quantile.Quantile;
 import hex.quantile.QuantileModel;
+import hex.tree.gbm.GBMModel;
 import hex.util.LinearAlgebraUtils;
 import jsr166y.CountedCompleter;
 import org.joda.time.format.DateTimeFormat;
@@ -350,6 +351,19 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
         initializeModelSpecifics();
         resumeFromCheckpoint(SharedTree.this);
         scoreAndBuildTrees(doOOBScoring());
+        if ((_model != null) && (_model instanceof GBMModel) && (_model._output != null) &&
+                (_model._output._training_metrics != null)
+                && (_model._output._training_metrics.auc_obj() != null)) {
+          if (_model._output._training_metrics.auc_obj()._reproducibilityError && ((GBMModel.GBMParameters) _parms)._true_reproducibility) {
+            Log.warn("GBM warning: "+" There could be reproducibility error across H2O clusters with same setup " +
+                    "runs due to ROC Histogram bin merging.");
+            Log.warn("GBM warning: ", "To mitigate this problem, run H2O with more memory, reduce " +
+                    "number of trees used and/or reduce tree depth.");
+            _job.warn("GBM warning: There could be reproducibility error across H2O clusters with same setup" +
+                    " runs due to ROC Histogram bin merging.  To mitigate this problem, run H2O with more " +
+                    "memory, reduce number of trees used and/or reduce tree depth.");
+          }
+        }
 
       } finally {
         if( _model!=null ) _model.unlock(_job);
@@ -686,7 +700,7 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
       // Score on training data
       _job.update(0,"Scoring the model.");
       _model._output._job = _job; // to allow to share the job for quantiles task
-      Score sc = new Score(this,_model._output._ntrees>0/*score 0-tree model from scratch*/,oob,response(),_model._output.getModelCategory(),computeGainsLift,_trainPredsCache, CFuncRef.from(_parms._custom_metric_func));
+      Score sc = new Score(this,_model._output._ntrees>0/*score 0-tree model from scratch*/,oob,response(),_model._output.getModelCategory(),computeGainsLift,_trainPredsCache, CFuncRef.from(_parms._custom_metric_func), finalScoring);
       ModelMetrics mm = sc.scoreAndMakeModelMetrics(_model, _parms.train(), train(), build_tree_one_node);
       out._training_metrics = mm;
       if (oob) out._training_metrics._description = "Metrics reported on Out-Of-Bag training samples";

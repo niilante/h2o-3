@@ -35,6 +35,11 @@ public class QuantileModel extends Model<QuantileModel,QuantileModel.QuantilePar
     throw H2O.unimpl("No model metrics for Quantile.");
   }
 
+  @Override
+  public ModelMetrics.MetricBuilder makeMetricBuilder(String[] domain, boolean finalScore) {
+    throw H2O.unimpl("No model metrics for Quantile.");
+  }
+
   @Override protected double[] score0(double data[/*ncols*/], double preds[/*nclasses+1*/]) {
     throw H2O.unimpl();
   }
