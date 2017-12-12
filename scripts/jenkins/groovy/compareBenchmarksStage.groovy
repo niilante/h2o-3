@@ -67,40 +67,56 @@ def call(buildConfig, stageConfig, benchmarkFolderConfig) {
         //
 
         def csvData = parseCsvFile(csvFilePath)
-        List<String> errorMessages = []
+        List failures = []
         for (column in TESTED_COLUMNS) {
             for (line in csvData) {
-                def datasetValues = EXPECTED_VALUES[line['dataset']]
+                def datasetValues = EXPECTED_VALUES[line.dataset]
                 if (datasetValues) {
-                    def ntreesValues = datasetValues[Integer.parseInt(line['ntrees'])]
+                    def ntreesValues = datasetValues[Integer.parseInt(line.ntrees)]
                     if (ntreesValues) {
                         def minValue = ntreesValues["${column}_min"]
                         if (minValue == null) {
-                            error("Minimum for ${column} for ${line['dataset']} with ${line['ntrees']} trees cannot be found")
+                            error("Minimum for ${column} for ${line.dataset} with ${line.ntrees} trees cannot be found")
                         }
                         def maxValue = ntreesValues["${column}_max"]
                         if (maxValue == null) {
-                            error("Maximum for ${column} for ${line['dataset']} with ${line['ntrees']} trees cannot be found")
+                            error("Maximum for ${column} for ${line.dataset} with ${line.ntrees} trees cannot be found")
                         }
                         def lineValue = Double.parseDouble(line[column])
-                        echo "Checking ${column} for ${line['dataset']} with ${line['ntrees']} trees"
-                        if ((lineValue < minValue) || (lineValue > maxValue)) {
-                            def errorMessage = "${column} for ${line['dataset']} with ${line['ntrees']} trees not in expected interval. Should be between ${minValue} and ${maxValue} but was ${lineValue}"
-                            errorMessages.add(errorMessage)
-                            echo errorMessage
+                        echo "Checking ${column} for ${line.dataset} with ${line.ntrees} trees"
+                        // FIXME
+                        if (false) { //if ((lineValue < minValue) || (lineValue > maxValue)) {
+                            echo "Check failed. Expected interval is ${minValue}..${maxValue}. Actual value ${lineValue}"
+                            failures += [
+                                    dataset: line.dataset,
+                                    ntrees: line.ntrees,
+                                    column: column,
+                                    min: minValue,
+                                    max: maxValue,
+                                    value: lineValue
+                            ]
                         } else {
                             echo "Check OK!"
                         }
                     } else {
-                        error "Cannot find EXPECTED_VALUES for ${line['dataset']} with ${line['ntrees']} trees"
+                        error "Cannot find EXPECTED_VALUES for ${line.dataset} with ${line.ntrees} trees"
                     }
                 } else {
-                    error "Cannot find EXPECTED_VALUES for ${line['dataset']}"
+                    error "Cannot find EXPECTED_VALUES for ${line.dataset}"
                 }
             }
         }
-        if (!errorMessages.isEmpty()) {
-            error "One or more checks failed: ${errorMessages.join('\n')}"
+        if (!failures.isEmpty()) {
+            echo failuresToText(failures)
+            emailext (
+                    subject: "H2O-3 BENCHMARK ALERT",
+                    body: """<p>Looks like some benchmark values are not in expected intervals.</p>
+                        <p>${failuresToText(failures, '<br/>')}</p>
+                        <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>""",
+                    to: "michalr@h2o.ai"
+            )
+            error "One or more checks failed"
+
         } else {
             echo "All checks passed!"
         }
@@ -146,6 +162,14 @@ def trimQuotes(final String text) {
         result = result.substring(0, result.length() - 1)
     }
     return result
+}
+
+def failuresToText(final failures, final String joinStr='\n') {
+    result = []
+    for (failure in failures) {
+        result += "Check of ${failure.column} for ${failure.dataset} with ${failure.ntrees}. Expected interval is ${failure.min}..${failure.max}. Actual value is ${failure.value}"
+    }
+    return result.join(joinStr)
 }
 
 return this
