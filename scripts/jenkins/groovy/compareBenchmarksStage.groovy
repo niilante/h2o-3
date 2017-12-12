@@ -33,22 +33,22 @@ def call(buildConfig, stageConfig, benchmarkFolderConfig) {
             ],
             'springleaf': [
                     50: [
-                            'train_time_min': 55,
+                            'train_time_min': 55.0,
                             'train_time_max': 63.5
                     ],
                     200: [
-                            'train_time_min': 464,
-                            'train_time_max': 497
+                            'train_time_min': 464.0,
+                            'train_time_max': 497.0
                     ]
             ],
             'higgs': [
                     50: [
-                            'train_time_min': 92,
-                            'train_time_max': 100
+                            'train_time_min': 92.0,
+                            'train_time_max': 100.0
                     ],
                     200: [
-                            'train_time_min': 510,
-                            'train_time_max': 559
+                            'train_time_min': 510.0,
+                            'train_time_max': 559.0
                     ]
             ]
     ]
@@ -56,57 +56,96 @@ def call(buildConfig, stageConfig, benchmarkFolderConfig) {
     def TESTED_COLUMNS = ['train_time']
 
     def insideDocker = load('h2o-3/scripts/jenkins/groovy/insideDocker.groovy')
+    def customEnv = load('h2o-3/scripts/jenkins/groovy/customEnv.groovy')
 
-    insideDocker(benchmarkEnv, stageConfig.image, buildConfig.DOCKER_REGISTRY, 5, 'MINUTES') {
-        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: buildConfig.AWS_CREDENTIALS_ID]]) {
-            String comparisonFile = benchmarkFolderConfig.getCSVPath()
+    insideDocker(customEnv(), stageConfig.image, buildConfig.DOCKER_REGISTRY, 5, 'MINUTES') {
+        String csvFilePath = benchmarkFolderConfig.getCSVPath()
 
-            echo """
-----------------------------------
-###### Get Results to S3 ######"
-----------------------------------
-    Comparing:    | ${comparisonFile}
-----------------------------------
-                """
-            //FIXME REMOVE
-            def latestFile = sh(script:'s3cmd ls s3://test.0xdata.com/benchmarks/master/csv/gbm/ | tail -1 | awk \'{print $4}\'', returnStdout: true).trim()
-            sh "s3cmd get ${latestFile} ${comparisonFile}"
-            //
+        //FIXME Load latest from S3, we don't run benchmarks while testing
+        def latestFile = sh(script:'s3cmd ls s3://test.0xdata.com/benchmarks/master/csv/gbm/ | tail -1 | awk \'{print $4}\'', returnStdout: true).trim()
+        sh "s3cmd get ${latestFile} ${csvFilePath}"
+        //
 
-            def csvData = new File(comparisonFile).withReader {
-                CsvParser.parseCsv(it)
-            }
-            echo "${csvData}"
-            List<String> errorMessages = []
-            for (column in TESTED_COLUMNS) {
-                for (line in csvData) {
-                    def datasetValues = EXPECTED_VALUES[line.dataset]
-                    if (relevantValues) {
-                        def ntreesValues = datasetValues[Integer.parseInt(line.ntrees)]
-                        if (ntreesValues) {
-                            def minValue = ntreesValues["${column}_min"]
-                            if (minValue == null) {
-                                error("Minimum for ${column} for ${line.dataset} with ${line.ntrees} trees cannot be found")
-                            }
-                            def maxValue = ntreesValues["${column}_max"]
-                            if (maxValue == null) {
-                                error("Maximum for ${column} for ${line.dataset} with ${line.ntrees} trees cannot be found")
-                            }
-                            def lineValue = Double.parseDouble(line[column])
-
-                            if ((lineValue < minValue) || (lineValue > maxValue)) {
-                                errorMessages.add("${column} for ${line.dataset} with ${line.ntrees} trees not in expected interval. Should be between ${minValue} and ${maxValue} but was ${lineValue}")
-                            }
+        def csvData = parseCsvFile(csvFilePath)
+        List<String> errorMessages = []
+        for (column in TESTED_COLUMNS) {
+            for (line in csvData) {
+                def datasetValues = EXPECTED_VALUES[line['dataset']]
+                if (datasetValues) {
+                    def ntreesValues = datasetValues[Integer.parseInt(line['ntrees'])]
+                    if (ntreesValues) {
+                        def minValue = ntreesValues["${column}_min"]
+                        if (minValue == null) {
+                            error("Minimum for ${column} for ${line['dataset']} with ${line['ntrees']} trees cannot be found")
+                        }
+                        def maxValue = ntreesValues["${column}_max"]
+                        if (maxValue == null) {
+                            error("Maximum for ${column} for ${line['dataset']} with ${line['ntrees']} trees cannot be found")
+                        }
+                        def lineValue = Double.parseDouble(line[column])
+                        echo "Checking ${column} for ${line['dataset']} with ${line['ntrees']} trees"
+                        if ((lineValue < minValue) || (lineValue > maxValue)) {
+                            def errorMessage = "${column} for ${line['dataset']} with ${line['ntrees']} trees not in expected interval. Should be between ${minValue} and ${maxValue} but was ${lineValue}"
+                            errorMessages.add(errorMessage)
+                            echo errorMessage
                         } else {
-                            error "Cannot find EXPECTED_VALUES for ${line.dataset} with ${line.ntrees} trees"
+                            echo "Check OK!"
                         }
                     } else {
-                        error "Cannot find EXPECTED_VALUES for ${line.dataset}"
+                        error "Cannot find EXPECTED_VALUES for ${line['dataset']} with ${line['ntrees']} trees"
                     }
+                } else {
+                    error "Cannot find EXPECTED_VALUES for ${line['dataset']}"
                 }
             }
         }
+        if (!errorMessages.isEmpty()) {
+            error "One or more checks failed: ${errorMessages.join('\n')}"
+        } else {
+            echo "All checks passed!"
+        }
     }
+}
+
+def parseCsvFile(final String filePath, final String separator=',') {
+    final String text = readFile(filePath)
+    if (text == null) {
+        return null
+    }
+
+    def result = []
+
+    List lines = text.split('\n')
+    if (lines.size() > 0) {
+        List colNames = lines[0].split(separator).collect{
+            trimQuotes(it)
+        }
+        Map colIndices = [:]
+        colNames.eachWithIndex{ e, i ->
+            colIndices[e] = i
+        }
+
+        for (line in lines[1..-1]) {
+            values = line.split(separator)
+            data = [:]
+            for (colName in colNames) {
+                data[colName] = trimQuotes(values[colIndices[colName]])
+            }
+            result += data
+        }
+    }
+    return result
+}
+
+def trimQuotes(final String text) {
+    def result = text
+    if (result.startsWith('"')) {
+        result = result.substring(1)
+    }
+    if (result.endsWith('"')) {
+        result = result.substring(0, result.length() - 1)
+    }
+    return result
 }
 
 return this
