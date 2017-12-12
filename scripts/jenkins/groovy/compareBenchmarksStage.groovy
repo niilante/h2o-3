@@ -85,7 +85,7 @@ def call(buildConfig, stageConfig, benchmarkFolderConfig) {
                         def lineValue = Double.parseDouble(line[column])
                         echo "Checking ${column} for ${line.dataset} with ${line.ntrees} trees"
                         // FIXME
-                        if (false) { //if ((lineValue < minValue) || (lineValue > maxValue)) {
+                        if (true) { //if ((lineValue < minValue) || (lineValue > maxValue)) {
                             echo "Check failed. Expected interval is ${minValue}..${maxValue}. Actual value ${lineValue}"
                             failures += [
                                     dataset: line.dataset,
