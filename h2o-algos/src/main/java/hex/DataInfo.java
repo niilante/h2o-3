@@ -531,7 +531,7 @@ public class DataInfo extends Keyed<DataInfo> {
     double [] normMul = null;
     int id = Arrays.binarySearch(cols,numStart());
     if(id < 0) id = -id-1;
-    int nnums = cols.length - id - hasIcpt;
+    final int nnums = cols.length - id - hasIcpt;
     int off = numStart();
     if(_normSub != null) {
       normSub = new double[nnums];
@@ -1224,7 +1224,7 @@ public class DataInfo extends Keyed<DataInfo> {
     res._offset = _offset && adaptFrame.find(names[offsetChunkId()]) != -1;
     res._fold = _fold && adaptFrame.find(names[foldChunkId()]) != -1;
     int resId = adaptFrame.find(names[responseChunkId(0)]);
-    if(resId == -1 || adaptFrame.vec(resId).isBad())
+    if (resId == -1)
       res._responses = 0;
     else // NOTE: DataInfo can have extra columns encoded as response, e.g. helper columns when doing Multinomail IRLSM, don't need those for scoring!.
       res._responses = 1;
